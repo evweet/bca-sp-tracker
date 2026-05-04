@@ -1,0 +1,5 @@
+# sp-tracker
+logs/
+*.log
+secret.pgpass
+*.bak
