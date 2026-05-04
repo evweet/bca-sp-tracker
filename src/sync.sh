@@ -6,17 +6,31 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+CONFIG_FILE="${REPO_DIR}/sp-tracker.conf"
 
-PGHOST="127.0.0.1"
-PGPORT=21521
-DATABASE="bca_dev"
-USERNAME="polaruser1"
-SCHEMA="tsadba"
-BRANCH="main"
-REMOTE="origin"
-COMMIT_USER="sp-tracker-bot"
-COMMIT_EMAIL="sp-tracker@localhost"
+load_config() {
+    if [[ -f "$CONFIG_FILE" ]]; then
+        set -a
+        # shellcheck disable=SC1090
+        . "$CONFIG_FILE"
+        set +a
+    fi
+}
+
+load_config
+
+PGHOST="${PGHOST:-127.0.0.1}"
+PGPORT="${PGPORT:-21521}"
+DATABASE="${DATABASE:-bca_dev}"
+USERNAME="${USERNAME:-polaruser1}"
+SCHEMA="${SCHEMA:-tsadba}"
+BRANCH="${BRANCH:-main}"
+REMOTE="${REMOTE:-origin}"
+COMMIT_USER="${COMMIT_USER:-sp-tracker-bot}"
+COMMIT_EMAIL="${COMMIT_EMAIL:-sp-tracker@localhost}"
+OUTPUT_SUBDIR="${OUTPUT_SUBDIR:-procedures}"
+LOG_SUBDIR="${LOG_SUBDIR:-logs}"
 NO_PUSH=0
 
 while [[ $# -gt 0 ]]; do
@@ -39,7 +53,7 @@ done
 
 cd "$REPO_DIR"
 
-LOG_DIR="${REPO_DIR}/logs"
+LOG_DIR="${REPO_DIR}/${LOG_SUBDIR}"
 mkdir -p "$LOG_DIR"
 LOG_FILE="${LOG_DIR}/sync-$(date '+%Y%m%d').log"
 exec > >(tee -a "$LOG_FILE") 2>&1
@@ -63,9 +77,9 @@ echo "Extracting procedures from ${SCHEMA}..."
 "${SCRIPT_DIR}/extract.sh" \
     --host "$PGHOST" --port "$PGPORT" --database "$DATABASE" \
     --username "$USERNAME" --schema "$SCHEMA" \
-    --output-dir "${REPO_DIR}/procedures"
+    --output-dir "${REPO_DIR}/${OUTPUT_SUBDIR}"
 
-status="$(git status --porcelain -- procedures/)"
+status="$(git status --porcelain -- "${OUTPUT_SUBDIR}/")"
 if [[ -z "$status" ]]; then
     echo "No changes detected. Nothing to commit."
     exit 0
@@ -76,7 +90,7 @@ echo "$status"
 git config user.name  "$COMMIT_USER"
 git config user.email "$COMMIT_EMAIL"
 
-git add procedures/
+git add "${OUTPUT_SUBDIR}/"
 
 timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
 msg_file="$(mktemp)"

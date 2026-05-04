@@ -8,15 +8,29 @@
 
 set -euo pipefail
 
-PGHOST="127.0.0.1"
-PGPORT=21521
-DATABASE="bca_dev"
-USERNAME="polaruser1"
-SCHEMA="tsadba"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-OUTPUT_DIR="${REPO_DIR}/procedures"
-PSQL="psql"
+REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+CONFIG_FILE="${REPO_DIR}/sp-tracker.conf"
+
+load_config() {
+    if [[ -f "$CONFIG_FILE" ]]; then
+        set -a
+        # shellcheck disable=SC1090
+        . "$CONFIG_FILE"
+        set +a
+    fi
+}
+
+load_config
+
+PGHOST="${PGHOST:-127.0.0.1}"
+PGPORT="${PGPORT:-21521}"
+DATABASE="${DATABASE:-bca_dev}"
+USERNAME="${USERNAME:-polaruser1}"
+SCHEMA="${SCHEMA:-tsadba}"
+OUTPUT_SUBDIR="${OUTPUT_SUBDIR:-procedures}"
+OUTPUT_DIR="${REPO_DIR}/${OUTPUT_SUBDIR}"
+PSQL="${PSQL:-psql}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -32,11 +46,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-PROCEDURES=(
-    "tsa_sp_school_weight_cal"
-    "tsa_sp_school_weight_cav_cal"
-    "tsa_sp_student_weight_cal"
-)
+TRACKED_PROCEDURES="${TRACKED_PROCEDURES:-tsa_sp_school_weight_cal,tsa_sp_school_weight_cav_cal,tsa_sp_student_weight_cal}"
+IFS=',' read -r -a PROCEDURES <<< "$TRACKED_PROCEDURES"
 
 # --- Pre-flight ---------------------------------------------------------
 if [[ -z "${PGPASSWORD:-}" ]]; then

@@ -13,9 +13,24 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+CONFIG_FILE="${REPO_DIR}/sp-tracker.conf"
+
+load_config() {
+    if [[ -f "$CONFIG_FILE" ]]; then
+        set -a
+        # shellcheck disable=SC1090
+        . "$CONFIG_FILE"
+        set +a
+    fi
+}
+
+load_config
+
 SYNC_SCRIPT="${SCRIPT_DIR}/sync.sh"
-RUN_HOUR="08"
-RUN_MIN="00"
+CRON_TIME="${CRON_TIME:-08:00}"
+IFS=":" read -r RUN_HOUR RUN_MIN <<< "$CRON_TIME"
+LOG_SUBDIR="${LOG_SUBDIR:-logs}"
 TAG="# sp-tracker-sync"
 REMOVE=0
 
@@ -42,7 +57,7 @@ if [[ "$REMOVE" -eq 1 ]]; then
     exit 0
 fi
 
-new_line="${RUN_MIN} ${RUN_HOUR} * * * /usr/bin/env bash ${SYNC_SCRIPT} >> ${SCRIPT_DIR}/../../logs/cron.log 2>&1 ${TAG}"
+new_line="${RUN_MIN} ${RUN_HOUR} * * * /usr/bin/env bash ${SYNC_SCRIPT} >> ${REPO_DIR}/${LOG_SUBDIR}/cron.log 2>&1 ${TAG}"
 
 {
     [[ -n "$existing" ]] && printf '%s\n' "$existing"

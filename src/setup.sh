@@ -6,7 +6,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 REMOTE_URL=""
 
 while [[ $# -gt 0 ]]; do
@@ -21,6 +21,30 @@ done
 cd "$REPO_DIR"
 
 mkdir -p procedures logs
+
+if [[ ! -f sp-tracker.conf ]]; then
+cat > sp-tracker.conf <<'EOF'
+# Shared configuration for the sp-tracker scripts.
+# Edit values here instead of changing the scripts directly.
+
+PGHOST="127.0.0.1"
+PGPORT="21521"
+DATABASE="bca_dev"
+USERNAME="polaruser1"
+SCHEMA="tsadba"
+PSQL="psql"
+
+BRANCH="main"
+REMOTE="origin"
+COMMIT_USER="sp-tracker-bot"
+COMMIT_EMAIL="sp-tracker@localhost"
+
+OUTPUT_SUBDIR="procedures"
+LOG_SUBDIR="logs"
+CRON_TIME="08:00"
+TRACKED_PROCEDURES="tsa_sp_school_weight_cal,tsa_sp_school_weight_cav_cal,tsa_sp_student_weight_cal"
+EOF
+fi
 
 if [[ ! -d .git ]]; then
     git init -b main >/dev/null
@@ -42,11 +66,10 @@ EOF
 cat > .gitattributes <<'EOF'
 * text=auto eol=lf
 *.sql text eol=lf
-*.ps1 text eol=lf
 *.sh  text eol=lf
 EOF
 
-git add .gitignore .gitattributes src/ LICENSE 2>/dev/null || true
+git add .gitignore .gitattributes sp-tracker.conf src/ LICENSE 2>/dev/null || true
 if [[ -n "$(git status --porcelain)" ]]; then
     git commit -m "chore: initial sp-tracker setup" >/dev/null
     echo "Created initial commit."
@@ -70,9 +93,10 @@ chmod +x "${SCRIPT_DIR}"/*.sh
 cat <<EOF
 
 Next steps (run from repo root '${REPO_DIR}'):
-  1. Create ./secret.pgpass containing the DB password (one line); chmod 600 it.
-  2. export PGPASSWORD="\$(cat ./secret.pgpass)"
-  3. ./src/linux/extract.sh   # validate
-  4. ./src/linux/sync.sh      # full cycle
-  5. ./src/linux/register-task.sh   # install daily cron entry
+    1. Edit ./sp-tracker.conf to change database, branch, paths, cron time, or tracked procedures.
+    2. Create ./secret.pgpass containing the DB password (one line); chmod 600 it.
+    3. export PGPASSWORD="\$(cat ./secret.pgpass)"
+    4. ./src/extract.sh        # validate
+    5. ./src/sync.sh           # full cycle
+    6. ./src/register-task.sh  # install daily cron entry
 EOF
