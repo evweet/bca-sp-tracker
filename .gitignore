@@ -2,4 +2,5 @@
 logs/
 *.log
 secret.pgpass
+*.conf
 *.bak
