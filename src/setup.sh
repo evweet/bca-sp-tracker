@@ -69,7 +69,7 @@ cat > .gitattributes <<'EOF'
 *.sh  text eol=lf
 EOF
 
-git add .gitignore .gitattributes sp-tracker.conf src/ LICENSE 2>/dev/null || true
+git add -A  2>/dev/null || true
 if [[ -n "$(git status --porcelain)" ]]; then
     git commit -m "chore: initial sp-tracker setup" >/dev/null
     echo "Created initial commit."
