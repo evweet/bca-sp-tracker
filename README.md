@@ -30,6 +30,12 @@ chmod +x src/*.sh
 
 ### Run the setup script
 ./src/setup.sh
+
+### Test the tracker
+./src/sync.sh
+
+### Register the sync.sh script to run periodically (e.g., using cron)
+./src/register-task.sh
 ```
 
 ## Under Docker
