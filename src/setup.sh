@@ -9,41 +9,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 REMOTE_URL=""
 
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --repo-dir)   REPO_DIR="$2"; shift 2 ;;
-        --remote-url) REMOTE_URL="$2"; shift 2 ;;
-        -h|--help)    sed -n '2,4p' "$0"; exit 0 ;;
-        *) echo "Unknown option: $1" >&2; exit 2 ;;
-    esac
-done
-
 cd "$REPO_DIR"
 
 mkdir -p procedures logs
 
 if [[ ! -f sp-tracker.conf ]]; then
-cat > sp-tracker.conf <<'EOF'
-# Shared configuration for the sp-tracker scripts.
-# Edit values here instead of changing the scripts directly.
-
-PGHOST="127.0.0.1"
-PGPORT="21521"
-DATABASE="bca_dev"
-USERNAME="polaruser1"
-SCHEMA="tsadba"
-PSQL="psql"
-
-BRANCH="main"
-REMOTE="origin"
-COMMIT_USER="sp-tracker-bot"
-COMMIT_EMAIL="sp-tracker@localhost"
-
-OUTPUT_SUBDIR="procedures"
-LOG_SUBDIR="logs"
-CRON_TIME="08:00"
-TRACKED_PROCEDURES="tsa_sp_school_weight_cal,tsa_sp_school_weight_cav_cal,tsa_sp_student_weight_cal"
-EOF
+    echo "ERROR: sp-tracker.conf not found. Please create it with appropriate settings before running this script." >&2
+    exit 2
 fi
 
 if [[ ! -d .git ]]; then
@@ -54,20 +26,6 @@ else
 fi
 
 git config core.autocrlf false
-
-cat > .gitignore <<'EOF'
-# sp-tracker
-logs/
-*.log
-secret.pgpass
-*.bak
-EOF
-
-cat > .gitattributes <<'EOF'
-* text=auto eol=lf
-*.sql text eol=lf
-*.sh  text eol=lf
-EOF
 
 git add -A  2>/dev/null || true
 if [[ -n "$(git status --porcelain)" ]]; then
