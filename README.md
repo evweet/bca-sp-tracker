@@ -30,7 +30,11 @@ chmod +x src/*.sh
 
 ### Run the setup script
 ./src/setup.sh
+```
 
+### 4. Initialize the tracker
+
+```bash
 ### Test the tracker
 ./src/sync.sh
 

@@ -52,9 +52,7 @@ cat <<EOF
 
 Next steps (run from repo root '${REPO_DIR}'):
     1. Edit ./sp-tracker.conf to change database, branch, paths, cron time, or tracked procedures.
-    2. Create ./secret.pgpass containing the DB password (one line); chmod 600 it.
-    3. export PGPASSWORD="\$(cat ./secret.pgpass)"
-    4. ./src/extract.sh        # validate
-    5. ./src/sync.sh           # full cycle
-    6. ./src/register-task.sh  # install daily cron entry
+    2. Create ./secret.pgpass containing the DB password (one line).
+    3. ./src/sync.sh           # full cycle
+    4. ./src/register-task.sh  # install daily cron entry
 EOF

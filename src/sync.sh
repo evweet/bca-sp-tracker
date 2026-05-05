@@ -27,29 +27,9 @@ USERNAME="${USERNAME:-polaruser1}"
 SCHEMA="${SCHEMA:-tsadba}"
 BRANCH="${BRANCH:-main}"
 REMOTE="${REMOTE:-origin}"
-COMMIT_USER="${COMMIT_USER:-sp-tracker-bot}"
-COMMIT_EMAIL="${COMMIT_EMAIL:-sp-tracker@localhost}"
 OUTPUT_SUBDIR="${OUTPUT_SUBDIR:-procedures}"
 LOG_SUBDIR="${LOG_SUBDIR:-logs}"
 NO_PUSH=0
-
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --repo-dir)     REPO_DIR="$2"; shift 2 ;;
-        --host)         PGHOST="$2"; shift 2 ;;
-        --port)         PGPORT="$2"; shift 2 ;;
-        --database)     DATABASE="$2"; shift 2 ;;
-        --username)     USERNAME="$2"; shift 2 ;;
-        --schema)       SCHEMA="$2"; shift 2 ;;
-        --branch)       BRANCH="$2"; shift 2 ;;
-        --remote)       REMOTE="$2"; shift 2 ;;
-        --commit-user)  COMMIT_USER="$2"; shift 2 ;;
-        --commit-email) COMMIT_EMAIL="$2"; shift 2 ;;
-        --no-push)      NO_PUSH=1; shift ;;
-        -h|--help)      sed -n '2,4p' "$0"; exit 0 ;;
-        *) echo "Unknown option: $1" >&2; exit 2 ;;
-    esac
-done
 
 cd "$REPO_DIR"
 
@@ -87,8 +67,6 @@ fi
 echo "Changes detected:"
 echo "$status"
 
-git config user.name  "$COMMIT_USER"
-git config user.email "$COMMIT_EMAIL"
 
 git add "${OUTPUT_SUBDIR}/"
 

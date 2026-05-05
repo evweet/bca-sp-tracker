@@ -34,15 +34,6 @@ LOG_SUBDIR="${LOG_SUBDIR:-logs}"
 TAG="# sp-tracker-sync"
 REMOVE=0
 
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --time)   IFS=":" read -r RUN_HOUR RUN_MIN <<< "$2"; shift 2 ;;
-        --remove) REMOVE=1; shift ;;
-        -h|--help) sed -n '2,4p' "$0"; exit 0 ;;
-        *) echo "Unknown option: $1" >&2; exit 2 ;;
-    esac
-done
-
 if [[ ! -f "$SYNC_SCRIPT" ]]; then
     echo "ERROR: sync.sh not found at $SYNC_SCRIPT" >&2
     exit 1

@@ -32,20 +32,6 @@ OUTPUT_SUBDIR="${OUTPUT_SUBDIR:-procedures}"
 OUTPUT_DIR="${REPO_DIR}/${OUTPUT_SUBDIR}"
 PSQL="${PSQL:-psql}"
 
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --host)       PGHOST="$2"; shift 2 ;;
-        --port)       PGPORT="$2"; shift 2 ;;
-        --database)   DATABASE="$2"; shift 2 ;;
-        --username)   USERNAME="$2"; shift 2 ;;
-        --schema)     SCHEMA="$2"; shift 2 ;;
-        --output-dir) OUTPUT_DIR="$2"; shift 2 ;;
-        --psql)       PSQL="$2"; shift 2 ;;
-        -h|--help)    sed -n '2,7p' "$0"; exit 0 ;;
-        *) echo "Unknown option: $1" >&2; exit 2 ;;
-    esac
-done
-
 TRACKED_PROCEDURES="${TRACKED_PROCEDURES:-tsa_sp_school_weight_cal,tsa_sp_school_weight_cav_cal,tsa_sp_student_weight_cal}"
 IFS=',' read -r -a PROCEDURES <<< "$TRACKED_PROCEDURES"
 
