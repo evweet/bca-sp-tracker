@@ -1,0 +1,19 @@
+# Shared configuration for the sp-tracker scripts.
+# Edit values here instead of changing the scripts directly.
+
+PGHOST=
+PGPORT=
+DATABASE=
+USERNAME=
+SCHEMA=
+PSQL=
+
+BRANCH=
+REMOTE=
+COMMIT_USER=
+COMMIT_EMAIL=
+
+OUTPUT_SUBDIR=
+LOG_SUBDIR=
+CRON_TIME=
+TRACKED_PROCEDURES=
