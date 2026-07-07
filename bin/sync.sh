@@ -28,15 +28,9 @@ SCHEMA="${SCHEMA:-tsadba}"
 BRANCH="${BRANCH:-main}"
 REMOTE="${REMOTE:-origin}"
 OUTPUT_SUBDIR="${OUTPUT_SUBDIR:-procedures}"
-LOG_SUBDIR="${LOG_SUBDIR:-logs}"
 NO_PUSH=0
 
 cd "$REPO_DIR"
-
-LOG_DIR="${REPO_DIR}/${LOG_SUBDIR}"
-mkdir -p "$LOG_DIR"
-LOG_FILE="${LOG_DIR}/sync-$(date '+%Y%m%d').log"
-exec > >(tee -a "$LOG_FILE") 2>&1
 
 started_at="$(date '+%Y-%m-%d %H:%M:%S %z')"
 echo "=== sp-tracker sync @ ${started_at} ==="
@@ -53,11 +47,8 @@ if [[ -z "${PGPASSWORD:-}" ]]; then
     fi
 fi
 
-echo "Extracting procedures from ${SCHEMA}..."
-"${SCRIPT_DIR}/extract.sh" \
-    --host "$PGHOST" --port "$PGPORT" --database "$DATABASE" \
-    --username "$USERNAME" --schema "$SCHEMA" \
-    --output-dir "${REPO_DIR}/${OUTPUT_SUBDIR}"
+echo "Extracting procedures from ${SCHEMA} in ${DATABASE}..."
+"${SCRIPT_DIR}/extract.sh"
 
 status="$(git status --porcelain -- "${OUTPUT_SUBDIR}/")"
 if [[ -z "$status" ]]; then

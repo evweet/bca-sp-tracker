@@ -11,7 +11,7 @@ REMOTE_URL=""
 
 cd "$REPO_DIR"
 
-mkdir -p procedures logs
+mkdir -p procedures
 
 if [[ ! -f sp-tracker.conf ]]; then
     echo "ERROR: sp-tracker.conf not found. Please create it with appropriate settings before running this script." >&2

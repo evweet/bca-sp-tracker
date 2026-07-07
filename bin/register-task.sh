@@ -30,7 +30,6 @@ load_config
 SYNC_SCRIPT="${SCRIPT_DIR}/sync.sh"
 CRON_TIME="${CRON_TIME:-08:00}"
 IFS=":" read -r RUN_HOUR RUN_MIN <<< "$CRON_TIME"
-LOG_SUBDIR="${LOG_SUBDIR:-logs}"
 TAG="# sp-tracker-sync"
 REMOVE=0
 
@@ -48,7 +47,7 @@ if [[ "$REMOVE" -eq 1 ]]; then
     exit 0
 fi
 
-new_line="${RUN_MIN} ${RUN_HOUR} * * * /usr/bin/env bash ${SYNC_SCRIPT} >> ${REPO_DIR}/${LOG_SUBDIR}/cron.log 2>&1 ${TAG}"
+new_line="${RUN_MIN} ${RUN_HOUR} * * * /usr/bin/env bash ${SYNC_SCRIPT} ${TAG}"
 
 {
     [[ -n "$existing" ]] && printf '%s\n' "$existing"
