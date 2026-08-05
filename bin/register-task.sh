@@ -20,7 +20,7 @@ load_config() {
     if [[ -f "$CONFIG_FILE" ]]; then
         set -a
         # shellcheck disable=SC1090
-        . "$CONFIG_FILE"
+        . <(sed 's/\r$//' "$CONFIG_FILE")
         set +a
     fi
 }

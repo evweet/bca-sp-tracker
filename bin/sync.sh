@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# sync.sh — Detect PG procedure changes and commit/push to Git
+# sync.sh — Detect PostgreSQL schema changes and commit/push to Git
 # ============================================================
 
 set -euo pipefail
@@ -13,7 +13,7 @@ load_config() {
     if [[ -f "$CONFIG_FILE" ]]; then
         set -a
         # shellcheck disable=SC1090
-        . "$CONFIG_FILE"
+        . <(sed 's/\r$//' "$CONFIG_FILE")
         set +a
     fi
 }
@@ -24,10 +24,9 @@ PGHOST="${PGHOST:-127.0.0.1}"
 PGPORT="${PGPORT:-21521}"
 DATABASE="${DATABASE:-bca_dev}"
 USERNAME="${USERNAME:-polaruser1}"
-SCHEMA="${SCHEMA:-tsadba}"
+SCHEMA="${SCHEMA:-bcadb}"
 BRANCH="${BRANCH:-main}"
 REMOTE="${REMOTE:-origin}"
-OUTPUT_SUBDIR="${OUTPUT_SUBDIR:-procedures}"
 NO_PUSH=0
 
 cd "$REPO_DIR"
@@ -47,10 +46,10 @@ if [[ -z "${PGPASSWORD:-}" ]]; then
     fi
 fi
 
-echo "Extracting procedures from ${SCHEMA} in ${DATABASE}..."
+echo "Extracting schema ${SCHEMA} from ${DATABASE}..."
 "${SCRIPT_DIR}/extract.sh"
 
-status="$(git status --porcelain -- "${OUTPUT_SUBDIR}/")"
+status="$(git status --porcelain -- schemas/)"
 if [[ -z "$status" ]]; then
     echo "No changes detected. Nothing to commit."
     exit 0
@@ -59,12 +58,12 @@ echo "Changes detected:"
 echo "$status"
 
 
-git add "${OUTPUT_SUBDIR}/"
+git add schemas/
 
 timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
 msg_file="$(mktemp)"
 {
-    echo "chore(sp): snapshot ${SCHEMA} @ ${timestamp}"
+    echo "chore(schema): snapshot ${SCHEMA} @ ${timestamp}"
     echo
     echo "Changed files:"
     echo "$status"

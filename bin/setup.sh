@@ -11,7 +11,7 @@ REMOTE_URL=""
 
 cd "$REPO_DIR"
 
-mkdir -p procedures
+mkdir -p schemas
 
 if [[ ! -f sp-tracker.conf ]]; then
     echo "ERROR: sp-tracker.conf not found. Please create it with appropriate settings before running this script." >&2
@@ -51,8 +51,8 @@ chmod +x "${SCRIPT_DIR}"/*.sh
 cat <<EOF
 
 Next steps (run from repo root '${REPO_DIR}'):
-    1. Edit ./sp-tracker.conf to change database, branch, paths, cron time, or tracked procedures.
+    1. Edit ./sp-tracker.conf to change the database, schema, branch, paths, or cron time.
     2. Create ./secret.pgpass containing the DB password (one line).
-    3. ./src/sync.sh           # full cycle
-    4. ./src/register-task.sh  # install daily cron entry
+    3. ./bin/sync.sh           # full cycle
+    4. ./bin/register-task.sh  # install daily cron entry
 EOF

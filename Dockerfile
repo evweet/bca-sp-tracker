@@ -6,11 +6,13 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
+RUN git config --system --add safe.directory /app
+
 WORKDIR /app
 
 COPY sp-tracker.conf ./
-COPY src/ ./src/
+COPY bin/ ./bin/
 
-RUN chmod +x ./src/*.sh
+RUN chmod +x ./bin/*.sh
 
-CMD ["./src/sync.sh"]
+CMD ["./bin/sync.sh"]

@@ -1,0 +1,5 @@
+.git
+schemas
+secret.pgpass
+*.log
+*.bak

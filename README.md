@@ -1,45 +1,63 @@
+# PostgreSQL Schema Tracker
 
-# Setup
+This project snapshots all DDL in a configured PostgreSQL schema, commits changes to Git, and pushes them to a remote repository. It does not dump table rows, object ownership, or privileges.
 
-## Under Linux directly
+Each configured database produces one file:
 
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/evweet/bca-sp-tracker.git
+```text
+schemas/<database>/<schema>.sql
 ```
 
-### 2. Configure the tracker
+The extraction is equivalent to:
 
 ```bash
-cd <project-directory>
-
-### 1. Modify the sp-tracker.conf file
-
-### 2. Add the database connection credentials to the secret.pgpass file
+pg_dump --schema-only --no-owner --no-privileges \
+  --restrict-key=7cL3mQ9vN2xR8kT5pW4dF6hJ1sB0yGzA \
+  --host=<host> --port=<port> --username=<user> \
+  --schema=<schema> --dbname=<database>
 ```
 
-### 3. Set up first commit
+## Configuration
+
+Copy the examples and set the connection details:
 
 ```bash
-### Remove the existing .git directory
-rm -rf .git
-
-### Add execution permission to the setup script
-chmod +x src/*.sh
-
-### Run the setup script
-./src/setup.sh
+cp sp-tracker.conf.example sp-tracker.conf
+cp secret.pgpass.example secret.pgpass
 ```
 
-### 4. Initialize the tracker
+Set `SCHEMA=bcadb` to track the complete `bcadb` schema. `DATABASE` accepts a comma-separated list, and each database is dumped to its own directory. Set `PG_DUMP` when the executable is not named `pg_dump` or is not on the default `PATH`. The stable restriction key prevents unchanged dumps from receiving randomized `pg_dump` metadata and producing false Git changes.
+
+`secret.pgpass` contains only the database password on its first non-empty line. Both local configuration files are excluded from Git.
+
+## Run on Linux
 
 ```bash
-### Test the tracker
-./src/sync.sh
-
-### Register the sync.sh script to run periodically (e.g., using cron)
-./src/register-task.sh
+chmod +x bin/*.sh
+./bin/setup.sh
+./bin/sync.sh
 ```
 
-## Under Docker
+`sync.sh` dumps the configured schema atomically, commits the snapshot when it changes, and pushes the commit to the configured branch and remote. Remove obsolete snapshot files manually after removing a database from `DATABASE` or changing `SCHEMA`.
+
+To install the configured daily cron job:
+
+```bash
+./bin/register-task.sh
+```
+
+## Run with Docker
+
+Build and run from the repository root after creating `sp-tracker.conf` and `secret.pgpass`. This example assumes the configured Git remote uses SSH:
+
+```bash
+docker build -t bca-sp-tracker .
+docker run --rm \
+  -e GIT_AUTHOR_NAME="$(git config user.name)" \
+  -e GIT_AUTHOR_EMAIL="$(git config user.email)" \
+  -e GIT_COMMITTER_NAME="$(git config user.name)" \
+  -e GIT_COMMITTER_EMAIL="$(git config user.email)" \
+  -v "${HOME}/.ssh:/root/.ssh:ro" \
+  -v "$(pwd):/app" \
+  bca-sp-tracker
+```

@@ -3,3 +3,4 @@
 secret.pgpass
 *.conf
 *.bak
+schemas/**/.*.sql.tmp.*
